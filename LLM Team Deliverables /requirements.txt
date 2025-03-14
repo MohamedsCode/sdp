@@ -1,0 +1,16 @@
+flask
+flask-cors
+flask-socketio
+numpy
+pandas
+datetime
+openai
+shapely
+geopy
+ipython
+ipykernel
+ipyleaflet
+ipywidgets
+leafmap
+mavsdk
+playsound
