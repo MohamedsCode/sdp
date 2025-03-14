@@ -63,14 +63,14 @@
 
     - name: Clone ku-argon-server repository
       git:
-        repo: "https://username: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@github.com/KU-UTM-Cloud/ku-argon-server.git"
+        repo: "https://username:[TOKEN HERE]@github.com/KU-UTM-Cloud/ku-argon-server.git"
         dest: "/home/{{ ansible_user }}/ku-argon-server"
         clone: yes
         update: yes
 
     - name: Clone ku-flight-spotlight repository
       git:
-        repo: "https://username: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@github.com/KU-UTM-Cloud/ku-flight-spotlight.git"
+        repo: "https://username:[TOKEN HERE]@github.com/KU-UTM-Cloud/ku-flight-spotlight.git"
         dest: "/home/{{ ansible_user }}/ku-flight-spotlight"
         clone: yes
         update: yes
