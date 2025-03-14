@@ -75,6 +75,13 @@
         clone: yes
         update: yes
 
+    - name: Clone ku-flight-passport repository
+      git:
+        repo: "https://username:[TOKEN HERE]@github.com:KU-UTM-Cloud/ku_flight_passport_oidc_client.git"
+        dest: "/home/{{ ansible_user }}/ku-flight-spotlight"
+        clone: yes
+        update: yes
+  
     - name: Run Docker Compose
       command: docker compose up
       args:
