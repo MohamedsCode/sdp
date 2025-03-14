@@ -1,1 +1,81 @@
+---
+- name: Mohammed Atrouz Requirements
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Update package lists
+      apt:
+        update_cache: yes
 
+    - name: Install required packages
+      apt:
+        name:
+          - git
+          - python3
+          - python3-pip
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+
+    - name: Add Microsoft GPG key
+      shell: "wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /usr/share/keyrings/packages.microsoft.gpg"
+      args:
+        creates: /usr/share/keyrings/packages.microsoft.gpg
+
+    - name: Add VS Code repository
+      shell: "echo 'deb [signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main' > /etc/apt/sources.list.d/vscode.list"
+      args:
+        creates: /etc/apt/sources.list.d/vscode.list
+
+    - name: Install VS Code
+      apt:
+        name: code
+        state: present
+        update_cache: yes
+
+    - name: Add Docker GPG key
+      shell: "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg"
+      args:
+        creates: /usr/share/keyrings/docker-archive-keyring.gpg
+
+    - name: Add Docker repository
+      shell: "echo 'deb [signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu focal stable' > /etc/apt/sources.list.d/docker.list"
+      args:
+        creates: /etc/apt/sources.list.d/docker.list
+
+    - name: Install Docker and Docker Compose
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker service is running
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
+
+    - name: Clone ku-argon-server repository
+      git:
+        repo: "https://username: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@github.com/KU-UTM-Cloud/ku-argon-server.git"
+        dest: "/home/{{ ansible_user }}/ku-argon-server"
+        clone: yes
+        update: yes
+
+    - name: Clone ku-flight-spotlight repository
+      git:
+        repo: "https://username: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@github.com/KU-UTM-Cloud/ku-flight-spotlight.git"
+        dest: "/home/{{ ansible_user }}/ku-flight-spotlight"
+        clone: yes
+        update: yes
+
+    - name: Run Docker Compose
+      command: docker compose up
+      args:
+        chdir: "/home/{{ ansible_user }}/ku-argon-server"
