@@ -86,31 +86,3 @@
       command: docker compose up
       args:
         chdir: "/home/{{ ansible_user }}/ku-argon-server"
-
-    - name: Create directory for Nginx Proxy Manager
-      file:
-        path: "/home/{{ ansible_user }}/nginx-proxy-manager"
-        state: directory
-        mode: '0755'
-
-    - name: Create docker-compose.yml for Nginx Proxy Manager
-      copy:
-        dest: "/home/{{ ansible_user }}/nginx-proxy-manager/docker-compose.yml"
-        content: |
-          services:
-            app:
-              image: 'jc21/nginx-proxy-manager:latest'
-              restart: unless-stopped
-              ports:
-                - '80:80'
-                - '81:81'
-                - '443:443'
-              volumes:
-                - ./data:/data
-                - ./letsencrypt:/etc/letsencrypt
-
-    - name: Run Nginx Proxy Manager using Docker Compose
-      command: docker compose up -d
-      args:
-        chdir: "/home/{{ ansible_user }}/nginx-proxy-manager"
-
