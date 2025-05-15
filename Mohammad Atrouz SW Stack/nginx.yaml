@@ -1,33 +1,21 @@
 ---
-- name: Deploy Nginx Proxy Manager using Docker Compose
-  hosts: localhost
+- name: Deploy Nginx Proxy Manager using Docker Compose in nginxtest directory
+  hosts: all
   become: yes
+
+  vars:
+    project_dir: "{{ ansible_user_dir }}/nginxtest"
+
   tasks:
-    - name: Install required packages
-      apt:
-        name:
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
-          - docker-compose-plugin
-        state: present
-        update_cache: yes
-
-    - name: Ensure Docker service is running
-      systemd:
-        name: docker
-        state: started
-        enabled: yes
-
-    - name: Create directory for Nginx Proxy Manager
-      file:
-        path: "/home/{{ ansible_user }}/nginx-proxy-manager"
+    - name: Create nginxtest directory if it doesn't exist
+      ansible.builtin.file:
+        path: "{{ project_dir }}"
         state: directory
         mode: '0755'
 
-    - name: Create docker-compose.yml for Nginx Proxy Manager
-      copy:
-        dest: "/home/{{ ansible_user }}/nginx-proxy-manager/docker-compose.yml"
+    - name: Create docker-compose.yml file
+      ansible.builtin.copy:
+        dest: "{{ project_dir }}/docker-compose.yml"
         content: |
           services:
             app:
@@ -40,8 +28,9 @@
               volumes:
                 - ./data:/data
                 - ./letsencrypt:/etc/letsencrypt
+        mode: '0644'
 
-    - name: Run Nginx Proxy Manager using Docker Compose
-      command: docker compose up -d
+    - name: Run Docker Compose to start the service
+      ansible.builtin.shell: docker compose up -d
       args:
-        chdir: "/home/{{ ansible_user }}/nginx-proxy-manager"
+        chdir: "{{ project_dir }}"
