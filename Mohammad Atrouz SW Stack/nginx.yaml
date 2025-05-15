@@ -1,6 +1,6 @@
 ---
 - name: Deploy Nginx Proxy Manager using Docker Compose in nginxtest directory
-  hosts: all
+  hosts: localhost
   become: yes
 
   vars:
