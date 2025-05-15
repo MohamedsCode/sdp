@@ -1,6 +1,6 @@
 ---
 - name: Setup Authentik using Docker Compose
-  hosts: all
+  hosts: localhost
   become: yes
 
   vars:
