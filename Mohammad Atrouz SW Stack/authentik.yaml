@@ -1,0 +1,67 @@
+---
+- name: Setup Authentik using Docker Compose
+  hosts: all
+  become: yes
+
+  vars:
+    authentik_dir: "{{ ansible_user_dir }}/authentik"
+
+  tasks:
+    - name: Create authentik directory if it doesn't exist
+      ansible.builtin.file:
+        path: "{{ authentik_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Download the docker-compose.yml file
+      ansible.builtin.get_url:
+        url: https://goauthentik.io/docker-compose.yml
+        dest: "{{ authentik_dir }}/docker-compose.yml"
+        mode: '0644'
+
+    - name: Generate PG_PASS and append to .env
+      ansible.builtin.shell: |
+        echo "PG_PASS=$(openssl rand -base64 36 | tr -d '\n')" >> .env
+      args:
+        chdir: "{{ authentik_dir }}"
+
+    - name: Generate AUTHENTIK_SECRET_KEY and append to .env
+      ansible.builtin.shell: |
+        echo "AUTHENTIK_SECRET_KEY=$(openssl rand -base64 60 | tr -d '\n')" >> .env
+      args:
+        chdir: "{{ authentik_dir }}"
+
+    - name: Enable error reporting and append to .env
+      ansible.builtin.lineinfile:
+        path: "{{ authentik_dir }}/.env"
+        line: "AUTHENTIK_ERROR_REPORTING__ENABLED=true"
+        create: yes
+
+    - name: Append SMTP settings to .env
+      ansible.builtin.blockinfile:
+        path: "{{ authentik_dir }}/.env"
+        marker: "# {mark} AUTHENTIK SMTP SETTINGS"
+        block: |
+          # SMTP Host Emails are sent to
+          AUTHENTIK_EMAIL__HOST=localhost
+          AUTHENTIK_EMAIL__PORT=25
+          # Optionally authenticate (don't add quotation marks to your password)
+          AUTHENTIK_EMAIL__USERNAME=
+          AUTHENTIK_EMAIL__PASSWORD=
+          # Use StartTLS
+          AUTHENTIK_EMAIL__USE_TLS=false
+          # Use SSL
+          AUTHENTIK_EMAIL__USE_SSL=false
+          AUTHENTIK_EMAIL__TIMEOUT=10
+          # Email address authentik will send from, should have a correct @domain
+          AUTHENTIK_EMAIL__FROM=authentik@localhost
+
+    - name: Pull Docker containers
+      ansible.builtin.shell: docker compose pull
+      args:
+        chdir: "{{ authentik_dir }}"
+
+    - name: Start Authentik using Docker Compose
+      ansible.builtin.shell: docker compose up -d
+      args:
+        chdir: "{{ authentik_dir }}"
